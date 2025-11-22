@@ -1,20 +1,6 @@
 <?php
 require '../auth_mhs.php';
-
 $courses = mysqli_query($conn, "SELECT * FROM course ORDER BY id DESC");
-
-function getCourseImagePath($nama_course) {
-    $baseDir = "../uploads/"; 
-    $slug = strtolower($nama_course);
-    $slug = preg_replace('/[^a-z0-9]+/i', '_', $slug);
-    $slug = trim($slug, '_');
-    $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif'];
-
-    foreach ($extensions as $ext) {
-        if (file_exists($baseDir . $slug . "." . $ext)) return $baseDir . $slug . "." . $ext;
-    }
-    return "https://via.placeholder.com/400x250?text=No+Image"; // Fallback image online jika lokal tidak ada
-}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -40,10 +26,9 @@ function getCourseImagePath($nama_course) {
 <div class="hero-section">
     <h1 class="hero-title">Wujudkan Karir Digital <span style="color:var(--primary);">Impianmu</span></h1>
     <p class="hero-subtitle">Belajar dari para expert dengan kurikulum terkini. Siap untuk masa depan digital.</p>
-    <a href="#list-course" class="btn btn-primary" style="padding:12px 30px; font-size:16px;">Jelajahi Kursus</a>
 </div>
 
-<div class="container" id="list-course">
+<div class="container">
     <div style="margin-bottom:24px; text-align:center;">
         <h2 style="font-weight:800; font-size:28px;">Kursus Populer</h2>
         <p style="color:var(--text-muted);">Pilih jalur karirmu dan mulai belajar hari ini</p>
@@ -51,11 +36,13 @@ function getCourseImagePath($nama_course) {
 
     <div class="grid">
         <?php while ($c = mysqli_fetch_assoc($courses)) : ?>
-            <?php $imgPath = getCourseImagePath($c['nama_course']); ?>
-            
+            <?php 
+                // Cek apakah ada URL gambar, jika tidak pakai gambar default placeholder
+                $imgUrl = !empty($c['gambar_url']) ? $c['gambar_url'] : 'https://placehold.co/600x400?text=No+Image';
+            ?>
             <div class="course-card">
                 <div class="course-img-wrapper">
-                    <img src="<?php echo $imgPath; ?>" alt="Course" class="course-img">
+                    <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Course" class="course-img">
                 </div>
                 <div class="course-body">
                     <span class="course-level"><?php echo htmlspecialchars($c['level']); ?></span>
@@ -75,6 +62,5 @@ function getCourseImagePath($nama_course) {
         <?php endwhile; ?>
     </div>
 </div>
-
 </body>
 </html>
