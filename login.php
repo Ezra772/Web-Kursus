@@ -1,80 +1,63 @@
 <?php
 require 'config.php';
-
 $error = "";
 
-// hanya jalan kalau tombol login ditekan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // ambil data form
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
-    // cek user
     $q = mysqli_query($conn, "SELECT * FROM users WHERE username = '$username'");
-
     if (mysqli_num_rows($q) == 1) {
         $user = mysqli_fetch_assoc($q);
-
-        // password plain text untuk tugas
         if ($password === $user['password']) {
             $_SESSION['user_id']      = $user['id'];
             $_SESSION['username']     = $user['username'];
             $_SESSION['role']         = $user['role'];
             $_SESSION['mahasiswa_id'] = $user['mahasiswa_id'];
 
-            if ($user['role'] === 'admin') {
-                header('Location: admin/index.php');
-            } else {
-                header('Location: mhs/index.php');
-            }
+            if ($user['role'] === 'admin') header('Location: admin/index.php');
+            else header('Location: mhs/index.php');
             exit;
-
-        } else {
-            $error = "Password salah.";
-        }
-
-    } else {
-        $error = "Username tidak ditemukan.";
-    }
+        } else { $error = "Password salah."; }
+    } else { $error = "Username tidak ditemukan."; }
 }
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Pendaftaran Course</title>
+    <title>Login - EduNext</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 <div class="full-height-center">
-    <div class="card" style="width: 100%; max-width: 360px;">
-        <h2 style="text-align:center; margin-bottom:16px;">Login</h2>
+    <div class="card" style="width: 100%; max-width: 400px; padding: 40px;">
+        <div style="text-align:center; margin-bottom:24px;">
+            <h1 style="color:var(--primary); font-weight:800; margin-bottom:8px;">EduNext</h1>
+            <p style="color:var(--text-muted);">Masuk untuk melanjutkan belajar</p>
+        </div>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo $error; ?></div>
+            <div class="badge badge-danger" style="display:block; text-align:center; margin-bottom:16px; padding:10px;">
+                <?php echo $error; ?>
+            </div>
         <?php endif; ?>
 
         <form method="POST">
             <label>Username</label>
-            <input type="text" name="username" required>
+            <input type="text" name="username" placeholder="Masukkan username" required>
 
             <label>Password</label>
-            <input type="password" name="password" required>
+            <input type="password" name="password" placeholder="Masukkan password" required>
 
-            <button class="btn btn-primary" style="width:100%; margin-top:4px;">Masuk</button>
+            <button class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;">Masuk Sekarang</button>
         </form>
 
-        <p style="text-align:center; margin-top:10px; font-size:13px;">
+        <p style="text-align:center; margin-top:20px; font-size:14px;">
             Belum punya akun?
-            <a href="register.php">Daftar sebagai mahasiswa</a>
+            <a href="register.php" style="color:var(--primary); font-weight:600; text-decoration:none;">Daftar di sini</a>
         </p>
-
-        <p style="text-align:center; margin-top:6px; font-size:12px; color:#6b7280;">
-            © <?php echo date('Y'); ?> Pendaftaran Course
-        </p>
-
     </div>
 </div>
 </body>

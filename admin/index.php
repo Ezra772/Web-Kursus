@@ -1,7 +1,12 @@
 <?php
 require '../auth_admin.php';
 
-// ambil data pendaftaran join mahasiswa + course
+// Hitung statistik sederhana
+$countMhs = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM mahasiswa"));
+$countCourse = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM course"));
+$countPendaftaran = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM pendaftaran"));
+
+// Query pendaftaran
 $sql = "
     SELECT 
         p.id,
@@ -17,54 +22,62 @@ $sql = "
         CASE WHEN p.status = 'Menunggu Konfirmasi' THEN 0 ELSE 1 END,
         p.tanggal_daftar DESC
 ";
-
 $pendaftaran = mysqli_query($conn, $sql);
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Admin</title>
+    <title>Dashboard Admin - EduNext</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
+
 <div class="navbar">
     <div class="navbar-inner">
-        <div class="navbar-brand">Admin Course</div>
+        <a href="index.php" class="navbar-brand">EduNext Admin</a>
         <div class="nav-links">
-            <a href="index.php">Dashboard</a>
-            <a href="mahasiswa_index.php">Data Mahasiswa</a>
-            <a href="course_index.php">Data Course</a>
-            <a href="../logout.php">Logout</a>
+            <a href="index.php" style="color:var(--primary);">Dashboard</a>
+            <a href="course_index.php">Kelola Kursus</a>
+            <a href="mahasiswa_index.php">Kelola User</a>
+            <a href="../logout.php" class="btn btn-danger" style="color:white; margin-left:16px; padding:6px 12px;">Logout</a>
         </div>
     </div>
 </div>
 
-<div class="container" style="margin-top:16px;">
-
-    <!-- Kartu sambutan -->
-    <div class="card">
-        <h2 style="margin-bottom:8px;">Halo, Admin <?php echo htmlspecialchars($_SESSION['username']); ?></h2>
-        <p>Kelola data mahasiswa, course, dan verifikasi pendaftaran dari mahasiswa.</p>
+<div class="container">
+    <h2 style="margin-bottom:20px;">Statistik Sistem</h2>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Mahasiswa</div>
+            <div class="stat-number"><?php echo $countMhs; ?></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Kursus</div>
+            <div class="stat-number"><?php echo $countCourse; ?></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Pendaftaran</div>
+            <div class="stat-number"><?php echo $countPendaftaran; ?></div>
+        </div>
     </div>
 
-    <!-- Tabel pendaftaran -->
     <div class="card">
-        <h3 style="margin-bottom:12px;">Verifikasi Pendaftaran Course</h3>
-        <p style="font-size:13px; color:#6b7280; margin-bottom:10px;">
-            Pendaftaran dengan status <strong>Menunggu Konfirmasi</strong> muncul di urutan paling atas.
-        </p>
+        <div style="margin-bottom:20px;">
+            <h3>Verifikasi Pendaftaran Terbaru</h3>
+            <p style="color:var(--text-muted); font-size:14px;">Pantau dan kelola pendaftaran mahasiswa yang masuk.</p>
+        </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>NIM</th>
-                    <th>Nama Mahasiswa</th>
-                    <th>Course</th>
-                    <th>Tanggal Daftar</th>
+                    <th>Mahasiswa</th>
+                    <th>Kursus</th>
+                    <th>Tanggal</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -73,57 +86,46 @@ $pendaftaran = mysqli_query($conn, $sql);
                 <?php
                 $no = 1;
                 if (mysqli_num_rows($pendaftaran) === 0): ?>
-                    <tr>
-                        <td colspan="7" style="text-align:center; padding:12px;">
-                            Belum ada pendaftaran course.
-                        </td>
-                    </tr>
-                <?php
-                else:
+                    <tr><td colspan="6" style="text-align:center;">Belum ada data.</td></tr>
+                <?php else:
                     while ($p = mysqli_fetch_assoc($pendaftaran)) :
                         $status = $p['status'];
-                        $isPending = ($status === 'Menunggu Konfirmasi');
+                        $badgeClass = 'badge-pending';
+                        if($status == 'Disetujui') $badgeClass = 'badge-success';
+                        if($status == 'Ditolak') $badgeClass = 'badge-danger';
                 ?>
                     <tr>
                         <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars($p['nim']); ?></td>
-                        <td><?php echo htmlspecialchars($p['nama_mahasiswa']); ?></td>
-                        <td><?php echo htmlspecialchars($p['nama_course']); ?></td>
-                        <td><?php echo htmlspecialchars($p['tanggal_daftar']); ?></td>
-                        <td><?php echo htmlspecialchars($status); ?></td>
                         <td>
-                            <?php if ($isPending): ?>
-                                <!-- Approve -->
+                            <strong><?php echo htmlspecialchars($p['nama_mahasiswa']); ?></strong><br>
+                            <span style="font-size:12px; color:#888;"><?php echo htmlspecialchars($p['nim']); ?></span>
+                        </td>
+                        <td><?php echo htmlspecialchars($p['nama_course']); ?></td>
+                        <td><?php echo date('d M Y', strtotime($p['tanggal_daftar'])); ?></td>
+                        <td><span class="badge <?php echo $badgeClass; ?>"><?php echo $status; ?></span></td>
+                        <td>
+                            <?php if ($status === 'Menunggu Konfirmasi'): ?>
                                 <form action="pendaftaran_update.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
                                     <input type="hidden" name="aksi" value="setuju">
-                                    <button class="btn btn-primary" style="font-size:12px;">
-                                        Setujui
-                                    </button>
+                                    <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;">Terima</button>
                                 </form>
-
-                                <!-- Tolak -->
                                 <form action="pendaftaran_update.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
                                     <input type="hidden" name="aksi" value="tolak">
-                                    <button class="btn btn-danger" style="font-size:12px;"
-                                            onclick="return confirm('Tolak pendaftaran ini?');">
-                                        Tolak
-                                    </button>
+                                    <button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="return confirm('Tolak?');">Tolak</button>
                                 </form>
                             <?php else: ?>
-                                <span style="font-size:12px; color:#6b7280;">Tidak ada aksi</span>
+                                <span style="color:#aaa;">Selesai</span>
                             <?php endif; ?>
                         </td>
                     </tr>
-                <?php
-                    endwhile;
-                endif;
-                ?>
+                <?php endwhile; endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 </body>
 </html>
