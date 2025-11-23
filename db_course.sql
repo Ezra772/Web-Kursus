@@ -37,7 +37,8 @@ CREATE TABLE course (
     nama_course VARCHAR(150) NOT NULL,
     deskripsi TEXT,
     level VARCHAR(50),
-    harga INT DEFAULT 0
+    harga INT DEFAULT 0,
+    gambar_url TEXT NULL
 ) ENGINE=InnoDB;
 
 -- =========================================
