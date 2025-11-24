@@ -5,7 +5,6 @@ $course_id = (int) $_GET['course_id'];
 $q_course  = mysqli_query($conn, "SELECT * FROM course WHERE id=$course_id");
 $course    = mysqli_fetch_assoc($q_course);
 
-// Ambil URL gambar atau default
 $imgUrl = !empty($course['gambar_url']) ? $course['gambar_url'] : 'https://placehold.co/600x400?text=No+Image';
 
 $mhs_id = $_SESSION['mahasiswa_id'];
@@ -25,7 +24,10 @@ $mhs    = mysqli_fetch_assoc($q_mhs);
     <div class="navbar-inner">
         <div class="navbar-brand">EduNext</div>
         <div class="nav-links">
-            <a href="index.php">Kembali</a>
+            <a href="index.php">Beranda</a>
+            <a href="kursus_saya.php">Kursus Saya</a>
+            <a href="riwayat.php">Riwayat</a>
+            <a href="../logout.php" class="btn btn-secondary" style="margin-left:16px; padding:8px 16px;">Logout</a>
         </div>
     </div>
 </div>

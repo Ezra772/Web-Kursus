@@ -16,8 +16,9 @@ $courses = mysqli_query($conn, "SELECT * FROM course ORDER BY id DESC");
     <div class="navbar-inner">
         <div class="navbar-brand">EduNext</div>
         <div class="nav-links">
-            <a href="index.php" style="color:var(--primary);">Beranda</a>
-            <a href="riwayat.php">Riwayat Saya</a>
+            <a href="index.php" style="color:var(--primary); font-weight:600;">Beranda</a>
+            <a href="kursus_saya.php">Kursus Saya</a>
+            <a href="riwayat.php">Riwayat</a>
             <a href="../logout.php" class="btn btn-secondary" style="margin-left:16px; padding:8px 16px;">Logout</a>
         </div>
     </div>
@@ -37,7 +38,6 @@ $courses = mysqli_query($conn, "SELECT * FROM course ORDER BY id DESC");
     <div class="grid">
         <?php while ($c = mysqli_fetch_assoc($courses)) : ?>
             <?php 
-                // Cek apakah ada URL gambar, jika tidak pakai gambar default placeholder
                 $imgUrl = !empty($c['gambar_url']) ? $c['gambar_url'] : 'https://placehold.co/600x400?text=No+Image';
             ?>
             <div class="course-card">
