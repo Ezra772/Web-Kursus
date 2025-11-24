@@ -1,12 +1,13 @@
 <?php
 require '../auth_admin.php';
 
-// Hitung statistik sederhana
+// Hitung statistik sederhana dari database
 $countMhs = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM mahasiswa"));
 $countCourse = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM course"));
 $countPendaftaran = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM pendaftaran"));
 
-// Query pendaftaran
+// Query untuk mengambil data pendaftaran (join dengan tabel mahasiswa & course)
+// Mengurutkan: "Menunggu Konfirmasi" paling atas, lalu berdasarkan tanggal terbaru
 $sql = "
     SELECT 
         p.id,
@@ -37,11 +38,14 @@ $pendaftaran = mysqli_query($conn, $sql);
 <div class="navbar">
     <div class="navbar-inner">
         <a href="index.php" class="navbar-brand">EduNext Admin</a>
+        
         <div class="nav-links">
-            <a href="index.php" style="color:var(--primary);">Dashboard</a>
+            <a href="index.php" style="font-weight:700;">Dashboard</a>
+            
             <a href="course_index.php">Kelola Kursus</a>
             <a href="mahasiswa_index.php">Kelola User</a>
-            <a href="../logout.php" class="btn btn-danger" style="color:white; margin-left:16px; padding:6px 12px;">Logout</a>
+            
+            <a href="../logout.php" class="btn btn-danger">Logout</a>
         </div>
     </div>
 </div>
@@ -86,10 +90,11 @@ $pendaftaran = mysqli_query($conn, $sql);
                 <?php
                 $no = 1;
                 if (mysqli_num_rows($pendaftaran) === 0): ?>
-                    <tr><td colspan="6" style="text-align:center;">Belum ada data.</td></tr>
+                    <tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada pendaftaran baru.</td></tr>
                 <?php else:
                     while ($p = mysqli_fetch_assoc($pendaftaran)) :
                         $status = $p['status'];
+                        // Tentukan warna badge berdasarkan status
                         $badgeClass = 'badge-pending';
                         if($status == 'Disetujui') $badgeClass = 'badge-success';
                         if($status == 'Ditolak') $badgeClass = 'badge-danger';
@@ -113,10 +118,10 @@ $pendaftaran = mysqli_query($conn, $sql);
                                 <form action="pendaftaran_update.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
                                     <input type="hidden" name="aksi" value="tolak">
-                                    <button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="return confirm('Tolak?');">Tolak</button>
+                                    <button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="return confirm('Tolak pendaftaran ini?');">Tolak</button>
                                 </form>
                             <?php else: ?>
-                                <span style="color:#aaa;">Selesai</span>
+                                <span style="color:#aaa; font-size:13px;">Selesai</span>
                             <?php endif; ?>
                         </td>
                     </tr>
